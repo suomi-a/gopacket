@@ -815,9 +815,10 @@ func (p *PacketSource) packetsToChannel() {
 	defer close(p.c)
 	for {
 		packet, err := p.NextPacket()
-		if err == io.EOF || err == syscall.EBADF {
+		switch err {
+		case io.EOF, io.ErrUnexpectedEOF, syscall.EBADF:
 			return
-		} else if err == nil {
+		case nil:
 			p.c <- packet
 		}
 	}
