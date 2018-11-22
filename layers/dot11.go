@@ -1462,6 +1462,7 @@ func (m *Dot11InformationElement) DecodeFromBytes(data []byte, df gopacket.Decod
 		return fmt.Errorf("Dot11InformationElement length %v too short, %v required", len(data), offset+int(m.Length))
 	}
 	if m.ID == 221 {
+		// FIXME: make sure m.Length is at least 4 before accessing data
 		// Vendor extension
 		m.OUI = data[offset : offset+4]
 		m.Info = data[offset+4 : offset+int(m.Length)]
@@ -1828,6 +1829,11 @@ func (m *Dot11MgmtProbeReq) LayerType() gopacket.LayerType  { return LayerTypeDo
 func (m *Dot11MgmtProbeReq) CanDecode() gopacket.LayerClass { return LayerTypeDot11MgmtProbeReq }
 func (m *Dot11MgmtProbeReq) NextLayerType() gopacket.LayerType {
 	return LayerTypeDot11InformationElement
+}
+
+func (m *Dot11MgmtProbeReq) DecodeFromBytes(data []byte, df gopacket.DecodeFeedback) error {
+	m.Payload = data
+	return m.Dot11Mgmt.DecodeFromBytes(data, df)
 }
 
 type Dot11MgmtProbeResp struct {
